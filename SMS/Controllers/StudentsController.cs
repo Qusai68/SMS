@@ -36,8 +36,8 @@ namespace SMS.Controllers
         
 
         }
-        [HttpGet("GetById{id}")]
-        public IActionResult GetById([FromQuery] long id)
+        [HttpGet("GetById/{id}")]
+        public IActionResult GetById(long id)
         {
             if (id == 0)
             {
