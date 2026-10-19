@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using SMS.DbContexts;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,6 +10,9 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<SchoolContext>(options => 
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolContext")));
 
 var app = builder.Build();
 

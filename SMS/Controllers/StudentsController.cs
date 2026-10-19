@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SMS.Models;
 using SMS.Dtos.Students;
+using SMS.DbContexts;
 
 namespace SMS.Controllers
 {
@@ -15,11 +16,18 @@ namespace SMS.Controllers
             new Student() { Id = 2, FirstName = "Jane", LastName = "Smith", BirthDate = new DateTime(1992, 5, 15) },
             new Student() { Id = 3, FirstName = "Michael", LastName = "Johnson", BirthDate = new DateTime(1988, 10, 20) }
         };
-     
+
+        //Dependency Injection
+        private readonly SchoolContext _dbcontext;
+        public StudentsController(SchoolContext dbcontext)
+        {
+            _dbcontext = dbcontext;
+        }
+
         [HttpGet("GetByCriteria")]
         public IActionResult GetByCriteria([FromQuery] SearchStudentDto studentDto )
         {
-            var result = from student in students
+            var result = from student in _dbcontext.Students
                          where (studentDto.Name == null || student.FirstName == studentDto.Name)
                          orderby student.Id descending
                          select new StudentDto
