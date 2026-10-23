@@ -73,7 +73,7 @@ namespace SMS.Controllers
                 Age = x.BirthDate.HasValue ? DateTime.Now.Year - x.BirthDate.Value.Year : null,
                 BirthDate = x.BirthDate,
                 GradeID = x.GradeId,
-                GradeName =x.Lookups.Name,
+                GradeName =x.Lookup.Name,
                 SectionId = x.SectionId,
                 SectionName = x.Lookup.Name,
                 Email = x.Email,

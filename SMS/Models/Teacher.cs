@@ -1,4 +1,6 @@
-﻿namespace SMS.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SMS.Models
 {
     public class Teacher
     {
@@ -6,12 +8,21 @@
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public DateTime? BirthDate { get; set; }
-        public string SubjectName { get; set; }
+        [ForeignKey("SubjectName")]
+        public long SubjectNameId { get; set; }
+        public Lookup SubjectName { get; set; } // navigation property
         public string? Email { get; set; }
-        public long Phone { get; set; }
-        public string Position { get; set; }
+        public string Phone { get; set; }
+        [ForeignKey("Position")]
+        public long PositionId { get; set; }
+        public Lookup Position { get; set; } // navigation property
         public long salary { get; set; }
-        public long ManagerId { get; set; }
+        [ForeignKey("Manager")]
+        public long? ManagerId { get; set; }
+        public Teacher Manager { get; set; } // navigation property
+        [ForeignKey("SuperVisedSection")]
+        public long SuperVisedSectionId { get; set; }
+        public Lookup SuperVisedSection { get; set; } // navigation property
 
     }
 }

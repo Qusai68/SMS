@@ -1,6 +1,6 @@
 ﻿namespace SMS.Models
 {
-    public class Lookup
+    public class  Lookup
     {
         public long Id { get; set; }
         public int MajorCode { get; set; }
