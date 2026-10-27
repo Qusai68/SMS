@@ -23,6 +23,11 @@ namespace SMS.Models
         [ForeignKey("SuperVisedSection")]
         public long SuperVisedSectionId { get; set; }
         public Lookup SuperVisedSection { get; set; } // navigation property
+        [ForeignKey("SuperVisedGrade")]
+        public long SuperVisedGradeId { get; set; }
+        public Lookup SuperVisedGrade { get; set; } // navigation property
+
+
 
     }
 }

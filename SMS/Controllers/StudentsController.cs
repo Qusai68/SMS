@@ -73,14 +73,16 @@ namespace SMS.Controllers
                 Age = x.BirthDate.HasValue ? DateTime.Now.Year - x.BirthDate.Value.Year : null,
                 BirthDate = x.BirthDate,
                 GradeID = x.GradeId,
-                GradeName =x.Lookup.Name,
+                GradeName =x.Lookups.Name,
                 SectionId = x.SectionId,
                 SectionName = x.Lookup.Name,
                 Email = x.Email,
                 Phone = x.Phone,
                 StatusId = x.StatusId,
-                StatusName = x.Lookup.Name,
-                HomeroomTeacherId = x.HomeroomTeacherId
+                StatusName = x.Status.Name,
+                HomeroomTeacherId = x.HomeroomTeacherId,
+                TeacherName = x.Teachers.FirstName + " " + x.Teachers.LastName
+
 
             }).FirstOrDefault(x => x.Id == id);
 

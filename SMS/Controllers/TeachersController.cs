@@ -34,6 +34,7 @@ namespace SMS.Controllers
                          from subject in _dbcontext.Lookup.Where(s => s.Id == teacher.SubjectNameId).DefaultIfEmpty()
                          from Manager in _dbcontext.Teacher.Where(m => m.Id == teacher.ManagerId).DefaultIfEmpty()
                          from SuperVisedSection in _dbcontext.Lookup.Where(s => s.Id == teacher.SuperVisedSectionId).DefaultIfEmpty()
+                         from SuperVisedGrade in _dbcontext.Lookup.Where(s => s.Id == teacher.SuperVisedGradeId).DefaultIfEmpty()
                          where (searchDto.Id == null || teacher.Id == searchDto.Id) &&
                                (searchDto.Position == null || lookup.Name == searchDto.Position)
                          orderby teacher.Id descending
@@ -52,7 +53,9 @@ namespace SMS.Controllers
                              ManagerId = teacher.ManagerId,
                              ManagerName = Manager.FirstName + " " + Manager.LastName, // Use the name from the manager teacher table
                              SuperVisedSectionId = teacher.SuperVisedSectionId,
-                             SuperVisedSectionName = SuperVisedSection.Name // Use the name from the supervised section teacher table
+                             SuperVisedSectionName = SuperVisedSection.Name,// Use the name from the supervised section teacher table
+                             SuperVisedGradeId = teacher.SuperVisedGradeId,
+                             SuperVisedGradeName = SuperVisedGrade.Name // Use the name from the supervised grade teacher table
 
                          };
 
@@ -76,9 +79,11 @@ namespace SMS.Controllers
                 PositionName = x.Position.Name,
                 salary = x.salary,
                 ManagerId = x.ManagerId,
-                ManagerName =x.FirstName + " " + x.LastName,
+                ManagerName =x.Manager.FirstName + " " + x.Manager.LastName,
                 SuperVisedSectionId = x.SuperVisedSectionId,
-                SuperVisedSectionName = x.FirstName + " " + x.LastName,
+                SuperVisedSectionName = x.SuperVisedSection.Name,
+                SuperVisedGradeId = x.SuperVisedGradeId,
+                SuperVisedGradeName = x.SuperVisedGrade.Name
 
             }).FirstOrDefault(x => x.Id == id);
 
@@ -106,10 +111,11 @@ namespace SMS.Controllers
                 PositionId = saveDto.PositionId,
                 salary = saveDto.salary,
                 ManagerId = saveDto.ManagerId,
-                SuperVisedSectionId = saveDto.SuperVisedSectionId
+                SuperVisedSectionId = saveDto.SuperVisedSectionId,
+                SuperVisedGradeId = saveDto.SuperVisedGradeId
             };
             _dbcontext.Teacher.Add(newTeacher);
-            _dbcontext.SaveChanges();
+                _dbcontext.SaveChanges();
             return Ok();
         }
         [HttpPut("Update")]
@@ -131,6 +137,7 @@ namespace SMS.Controllers
             existingTeacher.salary = saveDto.salary;
             existingTeacher.ManagerId = saveDto.ManagerId;
             existingTeacher.SuperVisedSectionId = saveDto.SuperVisedSectionId;
+            existingTeacher.SuperVisedGradeId = saveDto.SuperVisedGradeId;
             _dbcontext.SaveChanges();
 
             return Ok();

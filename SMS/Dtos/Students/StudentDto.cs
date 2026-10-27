@@ -14,7 +14,7 @@ namespace SMS.Dtos.Students
         public string? SectionName { get; set; }
 
         public string? Email { get; set; }
-        public long? Phone { get; set; }
+        public string? Phone { get; set; }
         public long? StatusId { get; set; }
         public string? StatusName { get; set; }
         public long? HomeroomTeacherId { get; set; }

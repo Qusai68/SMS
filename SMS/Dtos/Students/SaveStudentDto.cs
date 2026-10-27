@@ -8,7 +8,7 @@
         public long GradeId { get; set; }
         public long SectionId { get; set; }
         public string? Email { get; set; }
-        public long Phone { get; set; }
+        public string Phone { get; set; }
         public long StatusId { get; set; }
 
         public long HomeroomTeacherId { get; set; }
