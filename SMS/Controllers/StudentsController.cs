@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SMS.Models;
-using SMS.Dtos.Students;
 using SMS.DbContexts;
+using SMS.Dtos.Students;
+using SMS.Models;
+using System.Security.Claims;
 
 namespace SMS.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")] // Data Annotation
     [ApiController]// data annotation
     public class StudentsController : ControllerBase
@@ -29,6 +32,11 @@ namespace SMS.Controllers
         {
             try
             {
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+
+
                 var result = from student in _dbcontext.Student
                              from teacher in _dbcontext.Teacher.Where(t => t.Id == student.HomeroomTeacherId).DefaultIfEmpty()
                              from lookup in _dbcontext.Lookup.Where(l => l.Id == student.GradeId).DefaultIfEmpty()
@@ -56,6 +64,12 @@ namespace SMS.Controllers
 
 
 
+                if (role?.ToUpper() != "HR" && role?.ToUpper() != "ADMIN")
+                {
+                    result = result.Where(t => t.UserId == long.Parse(userId));
+                }
+
+
                 return Ok(result);
             }
             catch (Exception ex)
@@ -71,6 +85,11 @@ namespace SMS.Controllers
         {
             try
             {
+
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+
                 if (id == 0)
                 {
                     return BadRequest("Invalid student ID");
@@ -101,7 +120,17 @@ namespace SMS.Controllers
                     return NotFound("Student not found");
                 }
 
+                if (role?.ToUpper() != "HR" && role?.ToUpper() != "ADMIN")
+                {
+                    if (result.UserId != long.Parse(userId))
+                    {
+                        return Forbid();// You cant access this teacher because you are not HR or Admin and you are not the owner of this teacher record
+                    }
+                }
+
+
                 return Ok(result);
+
             }
             catch (Exception ex)
             {
@@ -110,12 +139,28 @@ namespace SMS.Controllers
 
            
         }
-
+        [Authorize(Roles = "HR,Admin")]
         [HttpPost("Add")]
         public IActionResult Add([FromBody] SaveStudentDto studentDto)
         {
             try
             {
+
+                var user = new User()
+                {
+                    Id = 0,
+                    Username = $"{studentDto.FirstName}_{studentDto.LastName}_SMS",
+                    HashedPassword = BCrypt.Net.BCrypt.HashPassword($"{studentDto.FirstName}@SMS"),
+                    IsAdmin = false
+                };
+
+                var isUserExists = _dbcontext.Users.Any(u => u.Username.ToUpper() == user.Username.ToUpper());
+                if (isUserExists)
+                {
+                    return BadRequest("User already exists");
+                }
+                _dbcontext.Users.Add(user);
+
                 var newStudent = new Student()
                 {
                     Id = 0, //(students.LastOrDefault()?.Id ?? 0) ,
@@ -127,7 +172,8 @@ namespace SMS.Controllers
                     Email = studentDto.Email,
                     Phone = studentDto.Phone,
                     StatusId = studentDto.StatusId,
-                    HomeroomTeacherId = studentDto.HomeroomTeacherId
+                    HomeroomTeacherId = studentDto.HomeroomTeacherId,
+                    User = user
 
                 };
                 _dbcontext.Student.Add(newStudent);
@@ -141,7 +187,7 @@ namespace SMS.Controllers
             }
         }
 
-
+        [Authorize(Roles = "HR,Admin")]
         [HttpPut("Update")]
         public IActionResult Update([FromBody] SaveStudentDto studentDto)
         {
@@ -174,6 +220,7 @@ namespace SMS.Controllers
         }
 
 
+        [Authorize(Roles = "HR,Admin")]
         [HttpDelete("Delete")]
         public IActionResult Delete([FromQuery] long id)
         {

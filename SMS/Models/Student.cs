@@ -31,6 +31,10 @@ namespace SMS.Models
 
         public Teacher Teachers { get; set; }
         public DateTime? BirthDate { get; set; }
-        
+
+        [ForeignKey("User")]
+        public long? UserId { get; set; } // Foreign key for User
+
+        public User User { get; set; } // Navigation property for User
     }
 }

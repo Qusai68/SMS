@@ -21,6 +21,8 @@ namespace SMS.Dtos.Students
         public string? TeacherName { get; set; }
          public string? GradeName { get; set; }
 
+        public long? UserId { get; set; }
+
 
     }
 }

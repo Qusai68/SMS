@@ -145,44 +145,56 @@ namespace SMS.Controllers
         public IActionResult Add([FromBody]SaveTeacherDto saveDto)
 
         {
-
-            var user = new User()
+            try
             {
-                Id = 0,
-                Username = $"{saveDto.FirstName}_{saveDto.LastName}_SMS",
-                HashedPassword = BCrypt.Net.BCrypt.HashPassword($"{saveDto.FirstName}@SMS"),
-                IsAdmin = false
+                var user = new User()
+                {
+                    Id = 0,
+                    Username = $"{saveDto.FirstName}_{saveDto.LastName}_SMS",
+                    HashedPassword = BCrypt.Net.BCrypt.HashPassword($"{saveDto.FirstName}@SMS"),
+                    IsAdmin = false
 
-            };
-            var isUserExists = _dbcontext.Users.Any(u => u.Username.ToUpper() == user.Username.ToUpper());
-            if(isUserExists)
-            {
-                return BadRequest("User already exists");
-            }
-            _dbcontext.Users.Add(user);
+                };
+                var isUserExists = _dbcontext.Users.Any(u => u.Username.ToUpper() == user.Username.ToUpper());
+                if (isUserExists)
+                {
+                    return BadRequest("User already exists");
+                }
+                _dbcontext.Users.Add(user);
 
 
-            var newTeacher = new Teacher
-            {
-                Id = 0,
-                FirstName = saveDto.FirstName,
-                LastName = saveDto.LastName,
-                BirthDate = saveDto.BirthDate,
-                SubjectNameId = saveDto.SubjectNameId,
-                Email = saveDto.Email,
-                Phone = saveDto.Phone,
-                PositionId = saveDto.PositionId,
-                salary = saveDto.salary,
-                ManagerId = saveDto.ManagerId,
-                SuperVisedSectionId = saveDto.SuperVisedSectionId,
-                SuperVisedGradeId = saveDto.SuperVisedGradeId,
-               // UserId = user.Id
-                User =user
-            };
-            _dbcontext.Teacher.Add(newTeacher);
+                var newTeacher = new Teacher
+                {
+                    Id = 0,
+                    FirstName = saveDto.FirstName,
+                    LastName = saveDto.LastName,
+                    BirthDate = saveDto.BirthDate,
+                    SubjectNameId = saveDto.SubjectNameId,
+                    Email = saveDto.Email,
+                    Phone = saveDto.Phone,
+                    PositionId = saveDto.PositionId,
+                    salary = saveDto.salary,
+                    ManagerId = saveDto.ManagerId,
+                    SuperVisedSectionId = saveDto.SuperVisedSectionId,
+                    SuperVisedGradeId = saveDto.SuperVisedGradeId,
+                    // UserId = user.Id
+                    User = user
+                };
+                _dbcontext.Teacher.Add(newTeacher);
                 _dbcontext.SaveChanges();
-            return Ok();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            
         }
+
+
+
+        [Authorize(Roles = "HR,Admin")]
         [HttpPut("Update")]
         public IActionResult Update( [FromBody] SaveTeacherDto saveDto)
         {
@@ -217,6 +229,7 @@ namespace SMS.Controllers
 
             
         }
+        [Authorize(Roles = "HR,Admin")]
         [HttpDelete("Delete/{id}")]
         public IActionResult Delete(long id)
         {
@@ -226,6 +239,12 @@ namespace SMS.Controllers
                 if (teacher == null)
                 {
                     return NotFound("Teacher Does Not Exist");
+                }
+
+                var teacherAssociate = _dbcontext.Teacher.Any(x => x.ManagerId == id);
+                if(teacherAssociate)
+                {
+                    return BadRequest("Cannot delete teacher because it assigned Students");
                 }
 
                 _dbcontext.Teacher.Remove(teacher);
