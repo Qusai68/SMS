@@ -197,6 +197,24 @@ namespace SMS.Controllers
             }
            
         }
+        // This method hashes a password using BCrypt and returns the hashed password.
+        [HttpGet("HashedPassword")]
+        public IActionResult HashedPassword(string password)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(password))
+                {
+                    return BadRequest("Password cannot be null or empty");
+                }
+                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+                return Ok(hashedPassword);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
     }
 }

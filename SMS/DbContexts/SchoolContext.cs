@@ -38,12 +38,14 @@ namespace SMS.DbContexts
 
 
                 );
+           
         }
 
         // Table Creation
         public DbSet<Student> Student { get; set; }
         public DbSet<Teacher> Teacher { get; set; }
         public DbSet<Lookup> Lookup { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 
     

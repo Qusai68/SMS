@@ -27,6 +27,11 @@ namespace SMS.Models
         public long SuperVisedGradeId { get; set; }
         public Lookup SuperVisedGrade { get; set; } // navigation property
 
+        [ForeignKey("User")]
+        public long? UserId { get; set; } // Foreign key for User
+        public User User { get; set; } // Navigation property for User
+
+
 
 
     }

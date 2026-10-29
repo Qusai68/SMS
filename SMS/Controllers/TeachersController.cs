@@ -1,12 +1,17 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SMS.DbContexts;
 using SMS.Dtos.Students;
 using SMS.Dtos.Teachers;
 using SMS.Models;
+using System.Security.Claims;
 
 namespace SMS.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TeachersController : ControllerBase
@@ -24,13 +29,18 @@ namespace SMS.Controllers
         }
 
 
-
+        
         [HttpGet("GetByCriteria")]
         public IActionResult GetByCriteria([FromQuery] SearchTeacherDto searchDto)
 
         {
             try
             {
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+
+
                 var result = from teacher in _dbcontext.Teacher
                              from lookup in _dbcontext.Lookup.Where(l => l.Id == teacher.PositionId).DefaultIfEmpty()
                              from subject in _dbcontext.Lookup.Where(s => s.Id == teacher.SubjectNameId).DefaultIfEmpty()
@@ -57,10 +67,14 @@ namespace SMS.Controllers
                                  SuperVisedSectionId = teacher.SuperVisedSectionId,
                                  SuperVisedSectionName = SuperVisedSection.Name,// Use the name from the supervised section teacher table
                                  SuperVisedGradeId = teacher.SuperVisedGradeId,
-                                 SuperVisedGradeName = SuperVisedGrade.Name // Use the name from the supervised grade teacher table
+                                 SuperVisedGradeName = SuperVisedGrade.Name, // Use the name from the supervised grade teacher table
+                                 UserId = teacher.UserId // Include the UserId property
 
                              };
-
+                if (role?.ToUpper() != "HR" && role?.ToUpper() != "ADMIN")
+                {
+                   result = result.Where(t => t.UserId == long.Parse(userId));
+                }
 
                 return Ok(result);
             }
@@ -77,6 +91,10 @@ namespace SMS.Controllers
         {
             try
             {
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+
                 var teacher = _dbcontext.Teacher.Select(x => new TeacherDto
                 {
                     Id = x.Id,
@@ -103,6 +121,16 @@ namespace SMS.Controllers
                     return NotFound("Teacher Does Not Exist");// 404
                 }
 
+                if (role?.ToUpper() != "HR" && role?.ToUpper() != "ADMIN")
+                {
+                    if(teacher.UserId != long.Parse(userId))
+                    {
+                        return Forbid();// You cant access this teacher because you are not HR or Admin and you are not the owner of this teacher record
+                    }
+                }
+
+
+
                 return Ok(teacher);
             }
             catch (Exception ex)
@@ -112,10 +140,28 @@ namespace SMS.Controllers
            
         
         }
+        [Authorize(Roles = "HR,Admin")]
         [HttpPost ("Add")]
         public IActionResult Add([FromBody]SaveTeacherDto saveDto)
 
         {
+
+            var user = new User()
+            {
+                Id = 0,
+                Username = $"{saveDto.FirstName}_{saveDto.LastName}_SMS",
+                HashedPassword = BCrypt.Net.BCrypt.HashPassword($"{saveDto.FirstName}@SMS"),
+                IsAdmin = false
+
+            };
+            var isUserExists = _dbcontext.Users.Any(u => u.Username.ToUpper() == user.Username.ToUpper());
+            if(isUserExists)
+            {
+                return BadRequest("User already exists");
+            }
+            _dbcontext.Users.Add(user);
+
+
             var newTeacher = new Teacher
             {
                 Id = 0,
@@ -129,7 +175,9 @@ namespace SMS.Controllers
                 salary = saveDto.salary,
                 ManagerId = saveDto.ManagerId,
                 SuperVisedSectionId = saveDto.SuperVisedSectionId,
-                SuperVisedGradeId = saveDto.SuperVisedGradeId
+                SuperVisedGradeId = saveDto.SuperVisedGradeId,
+               // UserId = user.Id
+                User =user
             };
             _dbcontext.Teacher.Add(newTeacher);
                 _dbcontext.SaveChanges();

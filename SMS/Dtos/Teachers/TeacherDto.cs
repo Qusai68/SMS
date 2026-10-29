@@ -24,6 +24,7 @@ namespace SMS.Dtos.Teachers
         public string? SuperVisedSectionName { get; set; }
         public long? SuperVisedGradeId { get; set; }
         public string? SuperVisedGradeName { get; set; }
+        public long? UserId { get; set; }
     }
 
     }
