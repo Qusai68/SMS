@@ -7,7 +7,7 @@ namespace SMS.Models
         public long Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public DateTime? BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
         [ForeignKey("SubjectName")]
         public long SubjectNameId { get; set; }
         public Lookup SubjectName { get; set; } // navigation property

@@ -48,7 +48,7 @@ namespace SMS.Controllers
                              {
                                  Id = student.Id,
                                  Name = student.FirstName + " " + student.LastName,
-                                 Age = student.BirthDate.HasValue ? DateTime.Now.Year - student.BirthDate.Value.Year : null,
+                                 Age = (int)((DateTime.Now - student.BirthDate).TotalDays / 365.25),
                                  BirthDate = student.BirthDate,
                                  GradeID = student.GradeId,
                                  GradeName = lookup.Name,
@@ -99,7 +99,7 @@ namespace SMS.Controllers
                 {
                     Id = x.Id,
                     Name = x.FirstName + " " + x.LastName,
-                    Age = x.BirthDate.HasValue ? DateTime.Now.Year - x.BirthDate.Value.Year : null,
+                    Age = (int)((DateTime.Now - x.BirthDate).TotalDays / 365.25),
                     BirthDate = x.BirthDate,
                     GradeID = x.GradeId,
                     GradeName = x.Lookups.Name,

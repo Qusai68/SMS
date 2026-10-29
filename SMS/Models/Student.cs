@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
 
 namespace SMS.Models
@@ -7,10 +8,14 @@ namespace SMS.Models
     {
 
         public long Id { get; set; }
+
         public string FirstName { get; set; }
+        
         public string LastName { get; set; }
-       
+
+        
         public string? Email { get; set; }
+    
         public string Phone { get; set; }
         [ForeignKey("Status")] // navigation property]
         public long StatusId { get; set; }
@@ -30,7 +35,7 @@ namespace SMS.Models
         public long HomeroomTeacherId { get; set; }
 
         public Teacher Teachers { get; set; }
-        public DateTime? BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
 
         [ForeignKey("User")]
         public long? UserId { get; set; } // Foreign key for User

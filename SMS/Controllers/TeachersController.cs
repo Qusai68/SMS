@@ -55,6 +55,7 @@ namespace SMS.Controllers
                                  Id = teacher.Id,
                                  Name = teacher.FirstName + " " + teacher.LastName,
                                  BirthDate = teacher.BirthDate,
+                                 Age = (int)((DateTime.Now - teacher.BirthDate).TotalDays / 365.25), // Calculate age based on BirthDate
                                  SubjectNameId = teacher.SubjectNameId,
                                  SubjectName = subject.Name, // Use the name from the subject lookup table
                                  Email = teacher.Email,
@@ -100,6 +101,7 @@ namespace SMS.Controllers
                     Id = x.Id,
                     Name = x.FirstName + " " + x.LastName,
                     BirthDate = x.BirthDate,
+                    Age = (int)((DateTime.Now - x.BirthDate).TotalDays / 365.25) ,
                     SubjectNameId = x.SubjectNameId,
                     SubjectName = x.SubjectName.Name,
                     Email = x.Email,
