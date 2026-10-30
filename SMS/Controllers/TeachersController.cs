@@ -114,7 +114,8 @@ namespace SMS.Controllers
                     SuperVisedSectionId = x.SuperVisedSectionId,
                     SuperVisedSectionName = x.SuperVisedSection.Name,
                     SuperVisedGradeId = x.SuperVisedGradeId,
-                    SuperVisedGradeName = x.SuperVisedGrade.Name
+                    SuperVisedGradeName = x.SuperVisedGrade.Name,
+                    UserId = x.UserId
 
                 }).FirstOrDefault(x => x.Id == id);
 

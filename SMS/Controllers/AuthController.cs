@@ -63,10 +63,20 @@ namespace SMS.Controllers
             else
             {
                 var teacher = _dbcontext.Teacher.Include(t => t.Position).FirstOrDefault(t => t.UserId == user.Id);
-                claims.Add(new Claim(ClaimTypes.Role, teacher.Position.Name));
+                if (teacher != null)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, teacher.Position.Name));
+                }
+                else
+                {
+                    var student = _dbcontext.Student.Include(s => s.Position).FirstOrDefault(s => s.UserId == user.Id);
+                    if (student != null)
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, student.Position.Name));
+                    }
 
-                var student = _dbcontext.Student.Include(s => s.Position).FirstOrDefault(s => s.UserId == user.Id);
-                claims.Add(new Claim(ClaimTypes.Role, student.Position.Name));
+                }
+               
             }
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("WHAFWEI#!@S!!112312WQEQW@RWQEQW432"));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
