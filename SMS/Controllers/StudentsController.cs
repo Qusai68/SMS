@@ -59,7 +59,9 @@ namespace SMS.Controllers
                                  StatusId = student.StatusId,
                                  StatusName = Status.Name,
                                  HomeroomTeacherId = student.HomeroomTeacherId,
-                                 TeacherName = teacher.FirstName + " " + teacher.LastName
+                                 TeacherName = teacher.FirstName + " " + teacher.LastName,
+                                 UserId = student.UserId,
+                                 PositionId = student.PositionId
                              };
 
 
@@ -110,9 +112,10 @@ namespace SMS.Controllers
                     StatusId = x.StatusId,
                     StatusName = x.Status.Name,
                     HomeroomTeacherId = x.HomeroomTeacherId,
-                    TeacherName = x.Teachers.FirstName + " " + x.Teachers.LastName
-
-
+                    TeacherName = x.Teachers.FirstName + " " + x.Teachers.LastName,
+                    UserId = x.UserId,
+                    PositionId = x.Position.Id,
+                    PositionName = x.Position.Name
                 }).FirstOrDefault(x => x.Id == id);
 
                 if (result == null)
@@ -173,7 +176,8 @@ namespace SMS.Controllers
                     Phone = studentDto.Phone,
                     StatusId = studentDto.StatusId,
                     HomeroomTeacherId = studentDto.HomeroomTeacherId,
-                    User = user
+                    User = user,
+                    PositionId = studentDto.PositionId
 
                 };
                 _dbcontext.Student.Add(newStudent);
@@ -208,6 +212,7 @@ namespace SMS.Controllers
                 student.Phone = studentDto.Phone;
                 student.StatusId = studentDto.StatusId;
                 student.HomeroomTeacherId = studentDto.HomeroomTeacherId;
+                student.PositionId = studentDto.PositionId;
 
                 _dbcontext.SaveChanges();
                 return Ok();

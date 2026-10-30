@@ -248,6 +248,12 @@ namespace SMS.Controllers
                 {
                     return BadRequest("Cannot delete teacher because it assigned Students");
                 }
+                var studentAssociate = _dbcontext.Student.Any(x => x.HomeroomTeacherId == id);
+
+                if(studentAssociate)
+                {
+                    return BadRequest("Cannot delete teacher because it assigned Students");
+                }
 
                 _dbcontext.Teacher.Remove(teacher);
                 _dbcontext.SaveChanges();

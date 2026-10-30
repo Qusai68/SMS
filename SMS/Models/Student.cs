@@ -41,5 +41,9 @@ namespace SMS.Models
         public long? UserId { get; set; } // Foreign key for User
 
         public User User { get; set; } // Navigation property for User
+
+        [ForeignKey("Position")]
+        public long PositionId { get; set; }
+        public Lookup Position { get; set; } // navigation property
     }
 }

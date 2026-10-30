@@ -23,6 +23,10 @@ namespace SMS.Dtos.Students
 
         public long? UserId { get; set; }
 
+        public long? PositionId { get; set; }
+        public string? PositionName { get; set; }
+
+
 
     }
 }

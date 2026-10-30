@@ -27,5 +27,8 @@ namespace SMS.Dtos.Students
         public long HomeroomTeacherId { get; set; }
 
         public DateTime BirthDate { get; set; }
+
+        [Range(1, long.MaxValue)]
+        public long PositionId { get; set; }
     }
 }
