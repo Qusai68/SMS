@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SMS.DbContexts;
 using SMS.Dtos.Students;
 using SMS.Models;
@@ -42,7 +43,12 @@ namespace SMS.Controllers
                              from lookup in _dbcontext.Lookup.Where(l => l.Id == student.GradeId).DefaultIfEmpty()
                              from Section in _dbcontext.Lookup.Where(s => s.Id == student.SectionId).DefaultIfEmpty()
                              from Status in _dbcontext.Lookup.Where(s => s.Id == student.StatusId).DefaultIfEmpty()
-                             where (studentDto.Name == null || student.FirstName == studentDto.Name)
+                             where 
+                             (studentDto.Name == null || student.FirstName .Contains (studentDto.Name)) &&
+                             (studentDto.Grade == null || lookup.Name == studentDto.Grade.ToString() &&
+                             ( studentDto.Section == null || Section.Name == studentDto.Section.ToString())
+                             
+                             )
                              orderby student.Id descending
                              select new StudentDto
                              {
@@ -59,7 +65,7 @@ namespace SMS.Controllers
                                  StatusId = student.StatusId,
                                  StatusName = Status.Name,
                                  HomeroomTeacherId = student.HomeroomTeacherId,
-                                 TeacherName = teacher.FirstName + " " + teacher.LastName,
+                                 TeacherName = student.FirstName + " " + student.LastName,
                                  UserId = student.UserId,
                                  PositionId = student.PositionId
                              };
@@ -236,6 +242,15 @@ namespace SMS.Controllers
                 if (student == null)
                 {
                     return NotFound("Student not found");
+                }
+                if (student.User != null)
+                {
+                    _dbcontext.Users.Remove(student.User);
+                }
+                var studentUserAssociate = _dbcontext.Teacher.Include(t => t.User).FirstOrDefault(x => x.Id == student.UserId);
+                if (student.User != null)
+                {
+                    _dbcontext.Users.Remove(student.User);
                 }
 
                 _dbcontext.Student.Remove(student);

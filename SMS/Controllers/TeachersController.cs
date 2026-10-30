@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SMS.DbContexts;
 using SMS.Dtos.Students;
 using SMS.Dtos.Teachers;
@@ -48,7 +49,8 @@ namespace SMS.Controllers
                              from SuperVisedSection in _dbcontext.Lookup.Where(s => s.Id == teacher.SuperVisedSectionId).DefaultIfEmpty()
                              from SuperVisedGrade in _dbcontext.Lookup.Where(s => s.Id == teacher.SuperVisedGradeId).DefaultIfEmpty()
                              where (searchDto.Id == null || teacher.Id == searchDto.Id) &&
-                                   (searchDto.Position == null || lookup.Name == searchDto.Position)
+                                   (searchDto.Position == null || lookup.Name == searchDto.Position) &&
+                                   (searchDto.Name == null || (teacher.FirstName +" " + teacher.LastName).Contains(searchDto.Name))
                              orderby teacher.Id descending
                              select new TeacherDto
                              {
@@ -247,13 +249,18 @@ namespace SMS.Controllers
                 var teacherAssociate = _dbcontext.Teacher.Any(x => x.ManagerId == id);
                 if(teacherAssociate)
                 {
-                    return BadRequest("Cannot delete teacher because it assigned Students");
+                    return BadRequest("Cannot delete teacher because it manages other Teachers");
                 }
                 var studentAssociate = _dbcontext.Student.Any(x => x.HomeroomTeacherId == id);
 
                 if(studentAssociate)
                 {
                     return BadRequest("Cannot delete teacher because it assigned Students");
+                }
+                var teacherUserAssociate = _dbcontext.Teacher.Include(t => t.User).FirstOrDefault(x => x.Id == teacher.UserId);
+                if (teacher.User != null)
+                {
+                    _dbcontext.Users.Remove(teacher.User);
                 }
 
                 _dbcontext.Teacher.Remove(teacher);

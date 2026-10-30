@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -29,11 +30,11 @@ namespace SMS.Controllers
                 var user = _dbcontext.Users.FirstOrDefault(u => u.Username.ToUpper() == loginDto.Username.ToUpper());
                 if (user == null)
                 {
-                    return BadRequest("Invalid username or password");
+                    return Unauthorized("Invalid username or password");
                 }
                 if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.HashedPassword))
                 {
-                    return BadRequest("Invalid username or password");
+                    return Unauthorized("Invalid username or password");
                 }
 
                 var token = GenerateJwtToken(user);
@@ -45,7 +46,36 @@ namespace SMS.Controllers
                 return BadRequest(ex.Message);
             }
         }
-    
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public IActionResult ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+        {
+            try
+            {
+                var userId =long.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var user = _dbcontext.Users.FirstOrDefault(u => u.Id == userId);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                if (!BCrypt.Net.BCrypt.Verify(changePasswordDto.OldPassword, user.HashedPassword))
+                {
+                    return Unauthorized("Invalid old password");
+                }
+                if(changePasswordDto.OldPassword == changePasswordDto.NewPassword)
+                {
+                    return BadRequest("New password cannot be the same as the old password");
+                }
+                user.HashedPassword = BCrypt.Net.BCrypt.HashPassword(changePasswordDto.NewPassword);
+                _dbcontext.SaveChanges();
+                return Ok("Password changed successfully");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
     private string GenerateJwtToken(User user)
         {
