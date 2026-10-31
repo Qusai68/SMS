@@ -185,6 +185,27 @@ namespace SMS.Controllers
                     // UserId = user.Id
                     User = user
                 };
+
+                var checkSubjectId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SubjectNameId);
+                if (!checkSubjectId)
+                {
+                    return BadRequest("Invalid SubjectNameId");
+                }
+                var checkPositionId = _dbcontext.Lookup.Any(l => l.Id == saveDto.PositionId);
+                if (!checkPositionId)
+                {
+                    return BadRequest("Invalid PositionId");
+                }
+                var checkSuperVisedSectionId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SuperVisedSectionId);
+                if (!checkSuperVisedSectionId)
+                {
+                    return BadRequest("Invalid SuperVisedSectionId");
+                }
+                var checkSuperVisedGradeId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SuperVisedGradeId);
+                if (!checkSuperVisedGradeId)
+                {
+                    return BadRequest("Invalid SuperVisedGradeId");
+                }
                 _dbcontext.Teacher.Add(newTeacher);
                 _dbcontext.SaveChanges();
                 return Ok();
@@ -222,7 +243,31 @@ namespace SMS.Controllers
                 existingTeacher.ManagerId = saveDto.ManagerId;
                 existingTeacher.SuperVisedSectionId = saveDto.SuperVisedSectionId;
                 existingTeacher.SuperVisedGradeId = saveDto.SuperVisedGradeId;
+
+                var checkSubjectId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SubjectNameId);
+                if (!checkSubjectId)
+                {
+                    return BadRequest("Invalid SubjectNameId");
+                }
+                var checkPositionId = _dbcontext.Lookup.Any(l => l.Id == saveDto.PositionId);
+                if (!checkPositionId)
+                {
+                    return BadRequest("Invalid PositionId");
+                }
+                var checkSuperVisedSectionId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SuperVisedSectionId);
+                if (!checkSuperVisedSectionId)
+                {
+                    return BadRequest("Invalid SuperVisedSectionId");
+                }
+                var checkSuperVisedGradeId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SuperVisedGradeId);
+                if (!checkSuperVisedGradeId)
+                {
+                    return BadRequest("Invalid SuperVisedGradeId");
+                }
+
                 _dbcontext.SaveChanges();
+
+
 
                 return Ok();
             }
@@ -240,7 +285,7 @@ namespace SMS.Controllers
         {
             try
             {
-                var teacher = _dbcontext.Teacher.FirstOrDefault(x => x.Id == id);
+                var teacher = _dbcontext.Teacher.Include(t => t.User).FirstOrDefault(x => x.Id == id);
                 if (teacher == null)
                 {
                     return NotFound("Teacher Does Not Exist");
@@ -257,7 +302,7 @@ namespace SMS.Controllers
                 {
                     return BadRequest("Cannot delete teacher because it assigned Students");
                 }
-                var teacherUserAssociate = _dbcontext.Teacher.Include(t => t.User).FirstOrDefault(x => x.Id == teacher.UserId);
+              
                 if (teacher.User != null)
                 {
                     _dbcontext.Users.Remove(teacher.User);

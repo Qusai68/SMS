@@ -43,12 +43,16 @@ namespace SMS.Controllers
                              from lookup in _dbcontext.Lookup.Where(l => l.Id == student.GradeId).DefaultIfEmpty()
                              from Section in _dbcontext.Lookup.Where(s => s.Id == student.SectionId).DefaultIfEmpty()
                              from Status in _dbcontext.Lookup.Where(s => s.Id == student.StatusId).DefaultIfEmpty()
+                             from Position in _dbcontext.Lookup.Where(p => p.Id == student.PositionId).DefaultIfEmpty()
                              where 
-                             (studentDto.Name == null || student.FirstName .Contains (studentDto.Name)) &&
-                             (studentDto.Grade == null || lookup.Name == studentDto.Grade.ToString() &&
-                             ( studentDto.Section == null || Section.Name == studentDto.Section.ToString())
+                             (studentDto.Name == null || (student.FirstName + " " + student.LastName) .Contains (studentDto.Name))
+
+                             &&   (studentDto.Grade == null || lookup.Name == studentDto.Grade.ToString())
+
+                             && ( studentDto.Section == null || Section.Name == studentDto.Section.ToString())
+                            
                              
-                             )
+                             
                              orderby student.Id descending
                              select new StudentDto
                              {
@@ -65,9 +69,10 @@ namespace SMS.Controllers
                                  StatusId = student.StatusId,
                                  StatusName = Status.Name,
                                  HomeroomTeacherId = student.HomeroomTeacherId,
-                                 TeacherName = student.FirstName + " " + student.LastName,
+                                 TeacherName = teacher.FirstName + " " + teacher.LastName ,
                                  UserId = student.UserId,
-                                 PositionId = student.PositionId
+                                 PositionId = student.PositionId,
+                                 PositionName = Position.Name
                              };
 
 
@@ -186,6 +191,34 @@ namespace SMS.Controllers
                     PositionId = studentDto.PositionId
 
                 };
+
+                var checkHomeroomTeacher = _dbcontext.Teacher.FirstOrDefault(t => t.Id == newStudent.HomeroomTeacherId);
+                if (checkHomeroomTeacher == null)
+                {
+                    return BadRequest(" teacher Id  not found");
+                }
+
+                var checkGrade = _dbcontext.Lookup.FirstOrDefault(g => g.Id == newStudent.GradeId);
+                if (checkGrade == null)
+                {
+                    return BadRequest("Grade Id not found");
+                }
+                var checkSection = _dbcontext.Lookup.FirstOrDefault(s => s.Id == newStudent.SectionId);
+                if (checkSection == null)
+                {
+                    return BadRequest("Section Id not found");
+                }
+                var checkStatus = _dbcontext.Lookup.FirstOrDefault(s => s.Id == newStudent.StatusId);
+                if (checkStatus == null)
+                {
+                    return BadRequest("Status Id not found");
+                }
+                var checkPosition = _dbcontext.Lookup.FirstOrDefault(p => p.Id == newStudent.PositionId);
+                if (checkPosition == null)
+                {
+                    return BadRequest("Position Id not found");
+                }
+
                 _dbcontext.Student.Add(newStudent);
                 _dbcontext.SaveChanges();
                 return Ok();
@@ -220,6 +253,34 @@ namespace SMS.Controllers
                 student.HomeroomTeacherId = studentDto.HomeroomTeacherId;
                 student.PositionId = studentDto.PositionId;
 
+                var checkHomeroomTeacher = _dbcontext.Teacher.FirstOrDefault(t => t.Id == studentDto.HomeroomTeacherId);
+                if (checkHomeroomTeacher == null)
+                {
+                    return BadRequest(" teacher Id  not found");
+                }
+
+                var checkGrade = _dbcontext.Lookup.Any(g => g.Id == studentDto.GradeId);
+                if (checkGrade == null)
+                {
+                    return BadRequest("Grade Id not found");
+                }
+                var checkSection = _dbcontext.Lookup.Any(s => s.Id == studentDto.SectionId);
+                if (!checkSection)
+                {
+                    return BadRequest("Section Id not found");
+                }
+                var checkStatus = _dbcontext.Lookup.Any(s => s.Id == studentDto.StatusId);
+                if (!checkStatus)
+                {
+                    return BadRequest("Status Id not found");
+                }
+                var checkPosition = _dbcontext.Lookup.Any(p => p.Id == studentDto.PositionId);
+                if (!checkPosition)
+                {
+                    return BadRequest("Position Id not found");
+                }
+
+
                 _dbcontext.SaveChanges();
                 return Ok();
             }
@@ -232,12 +293,12 @@ namespace SMS.Controllers
 
 
         [Authorize(Roles = "HR,Admin")]
-        [HttpDelete("Delete")]
-        public IActionResult Delete([FromQuery] long id)
+        [HttpDelete("Delete{id}")]
+        public IActionResult Delete( long id)
         {
             try 
             {
-                var student = _dbcontext.Student.FirstOrDefault(x => x.Id == id);
+                var student = _dbcontext.Student.Include(s => s.User).FirstOrDefault(x => x.Id == id);
 
                 if (student == null)
                 {
