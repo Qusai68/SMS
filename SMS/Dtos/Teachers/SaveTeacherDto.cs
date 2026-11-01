@@ -35,6 +35,8 @@ namespace SMS.Dtos.Teachers
         public long SuperVisedSectionId { get; set; }
       
         public long SuperVisedGradeId { get; set; }
+        public long StatusId { get; set; }
+        
 
     }
 }

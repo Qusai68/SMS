@@ -198,23 +198,23 @@ namespace SMS.Controllers
                     return BadRequest(" teacher Id  not found");
                 }
 
-                var checkGrade = _dbcontext.Lookup.FirstOrDefault(g => g.Id == newStudent.GradeId);
-                if (checkGrade == null)
+                var checkGrade = _dbcontext.Lookup.Any(g => g.Id == newStudent.GradeId && g.MajorCode == 0);
+                if (!checkGrade )
                 {
                     return BadRequest("Grade Id not found");
                 }
-                var checkSection = _dbcontext.Lookup.FirstOrDefault(s => s.Id == newStudent.SectionId);
-                if (checkSection == null)
+                var checkSection = _dbcontext.Lookup.Any(s => s.Id == newStudent.SectionId && s.MajorCode == 1);
+                if (!checkSection)
                 {
                     return BadRequest("Section Id not found");
                 }
-                var checkStatus = _dbcontext.Lookup.FirstOrDefault(s => s.Id == newStudent.StatusId);
-                if (checkStatus == null)
+                var checkStatus = _dbcontext.Lookup.Any(s => s.Id == newStudent.StatusId && s.MajorCode == 2);
+                if (!checkStatus)
                 {
                     return BadRequest("Status Id not found");
                 }
-                var checkPosition = _dbcontext.Lookup.FirstOrDefault(p => p.Id == newStudent.PositionId);
-                if (checkPosition == null)
+                var checkPosition = _dbcontext.Lookup.Any(p => p.Id == newStudent.PositionId && p.MajorCode == 3);
+                if (!checkPosition)
                 {
                     return BadRequest("Position Id not found");
                 }
@@ -245,40 +245,52 @@ namespace SMS.Controllers
                 student.FirstName = studentDto.FirstName;
                 student.LastName = studentDto.LastName;
                 student.BirthDate = studentDto.BirthDate;
+
+
                 student.GradeId = studentDto.GradeId;
+                var checkGrade = _dbcontext.Lookup.Any(g => g.Id == studentDto.GradeId  && g.MajorCode == 0);
+                if (!checkGrade)
+                {
+                    return BadRequest("Grade Id not found");
+                }
+
                 student.SectionId = studentDto.SectionId;
+                var checkSection = _dbcontext.Lookup.Any(s => s.Id == studentDto.SectionId && s.MajorCode == 1);
+                if (!checkSection)
+                {
+                    return BadRequest("Section Id not found");
+                }
+
+
                 student.Email = studentDto.Email;
                 student.Phone = studentDto.Phone;
                 student.StatusId = studentDto.StatusId;
-                student.HomeroomTeacherId = studentDto.HomeroomTeacherId;
-                student.PositionId = studentDto.PositionId;
+                var checkStatus = _dbcontext.Lookup.Any(s => s.Id == studentDto.StatusId && s.MajorCode == 2);
+                if (!checkStatus)
+                {
+                    return BadRequest("Status Id not found");
+                }
 
+
+                student.HomeroomTeacherId = studentDto.HomeroomTeacherId;
                 var checkHomeroomTeacher = _dbcontext.Teacher.FirstOrDefault(t => t.Id == studentDto.HomeroomTeacherId);
                 if (checkHomeroomTeacher == null)
                 {
                     return BadRequest(" teacher Id  not found");
                 }
 
-                var checkGrade = _dbcontext.Lookup.Any(g => g.Id == studentDto.GradeId);
-                if (checkGrade == null)
-                {
-                    return BadRequest("Grade Id not found");
-                }
-                var checkSection = _dbcontext.Lookup.Any(s => s.Id == studentDto.SectionId);
-                if (!checkSection)
-                {
-                    return BadRequest("Section Id not found");
-                }
-                var checkStatus = _dbcontext.Lookup.Any(s => s.Id == studentDto.StatusId);
-                if (!checkStatus)
-                {
-                    return BadRequest("Status Id not found");
-                }
-                var checkPosition = _dbcontext.Lookup.Any(p => p.Id == studentDto.PositionId);
+
+
+                student.PositionId = studentDto.PositionId;
+                var checkPosition = _dbcontext.Lookup.Any(p => p.Id == studentDto.PositionId && p.MajorCode == 3);
                 if (!checkPosition)
                 {
                     return BadRequest("Position Id not found");
                 }
+
+
+
+
 
 
                 _dbcontext.SaveChanges();
@@ -308,11 +320,7 @@ namespace SMS.Controllers
                 {
                     _dbcontext.Users.Remove(student.User);
                 }
-                var studentUserAssociate = _dbcontext.Teacher.Include(t => t.User).FirstOrDefault(x => x.Id == student.UserId);
-                if (student.User != null)
-                {
-                    _dbcontext.Users.Remove(student.User);
-                }
+                
 
                 _dbcontext.Student.Remove(student);
                 _dbcontext.SaveChanges();

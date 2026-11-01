@@ -31,6 +31,11 @@ namespace SMS.Models
         public long? UserId { get; set; } // Foreign key for User
         public User User { get; set; } // Navigation property for User
 
+        [ForeignKey("Status")]
+        public long StatusId { get; set; }
+
+        public Lookup Status { get; set; } // navigation property
+
 
 
 

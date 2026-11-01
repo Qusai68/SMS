@@ -48,6 +48,7 @@ namespace SMS.Controllers
                              from Manager in _dbcontext.Teacher.Where(m => m.Id == teacher.ManagerId).DefaultIfEmpty()
                              from SuperVisedSection in _dbcontext.Lookup.Where(s => s.Id == teacher.SuperVisedSectionId).DefaultIfEmpty()
                              from SuperVisedGrade in _dbcontext.Lookup.Where(s => s.Id == teacher.SuperVisedGradeId).DefaultIfEmpty()
+                             from Status in _dbcontext.Lookup.Where(st => st.Id == teacher.StatusId).DefaultIfEmpty()
                              where (searchDto.Id == null || teacher.Id == searchDto.Id) &&
                                    (searchDto.Position == null || lookup.Name == searchDto.Position) &&
                                    (searchDto.Name == null || (teacher.FirstName +" " + teacher.LastName).Contains(searchDto.Name))
@@ -71,7 +72,9 @@ namespace SMS.Controllers
                                  SuperVisedSectionName = SuperVisedSection.Name,// Use the name from the supervised section teacher table
                                  SuperVisedGradeId = teacher.SuperVisedGradeId,
                                  SuperVisedGradeName = SuperVisedGrade.Name, // Use the name from the supervised grade teacher table
-                                 UserId = teacher.UserId // Include the UserId property
+                                 UserId = teacher.UserId, // Include the UserId property
+                                 StatusId = teacher.StatusId,
+                                 StatusName = Status.Name, // Use the name from the status lookup table
 
                              };
                 if (role?.ToUpper() != "HR" && role?.ToUpper() != "ADMIN")
@@ -117,7 +120,9 @@ namespace SMS.Controllers
                     SuperVisedSectionName = x.SuperVisedSection.Name,
                     SuperVisedGradeId = x.SuperVisedGradeId,
                     SuperVisedGradeName = x.SuperVisedGrade.Name,
-                    UserId = x.UserId
+                    UserId = x.UserId,
+                    StatusId = x.StatusId,
+                    StatusName = x.Status.Name
 
                 }).FirstOrDefault(x => x.Id == id);
 
@@ -183,28 +188,34 @@ namespace SMS.Controllers
                     SuperVisedSectionId = saveDto.SuperVisedSectionId,
                     SuperVisedGradeId = saveDto.SuperVisedGradeId,
                     // UserId = user.Id
-                    User = user
+                    User = user,
+                    StatusId = saveDto.StatusId
                 };
 
-                var checkSubjectId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SubjectNameId);
+                var checkSubjectId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SubjectNameId && l.MajorCode == 4);
                 if (!checkSubjectId)
                 {
                     return BadRequest("Invalid SubjectNameId");
                 }
-                var checkPositionId = _dbcontext.Lookup.Any(l => l.Id == saveDto.PositionId);
+                var checkPositionId = _dbcontext.Lookup.Any(l => l.Id == saveDto.PositionId && l.MajorCode ==3 );
                 if (!checkPositionId)
                 {
                     return BadRequest("Invalid PositionId");
                 }
-                var checkSuperVisedSectionId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SuperVisedSectionId);
+                var checkSuperVisedSectionId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SuperVisedSectionId && l.MajorCode == 1);
                 if (!checkSuperVisedSectionId)
                 {
                     return BadRequest("Invalid SuperVisedSectionId");
                 }
-                var checkSuperVisedGradeId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SuperVisedGradeId);
+                var checkSuperVisedGradeId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SuperVisedGradeId && l.MajorCode == 0);
                 if (!checkSuperVisedGradeId)
                 {
                     return BadRequest("Invalid SuperVisedGradeId");
+                }
+                var checkStatusId = _dbcontext.Lookup.Any(l => l.Id == saveDto.StatusId && l.MajorCode == 2);
+                if (!checkStatusId)
+                {
+                    return BadRequest("Invalid StatusId");
                 }
                 _dbcontext.Teacher.Add(newTeacher);
                 _dbcontext.SaveChanges();
@@ -244,25 +255,31 @@ namespace SMS.Controllers
                 existingTeacher.SuperVisedSectionId = saveDto.SuperVisedSectionId;
                 existingTeacher.SuperVisedGradeId = saveDto.SuperVisedGradeId;
 
-                var checkSubjectId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SubjectNameId);
+
+                var checkSubjectId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SubjectNameId && l.MajorCode == 4);
                 if (!checkSubjectId)
                 {
                     return BadRequest("Invalid SubjectNameId");
                 }
-                var checkPositionId = _dbcontext.Lookup.Any(l => l.Id == saveDto.PositionId);
+                var checkPositionId = _dbcontext.Lookup.Any(l => l.Id == saveDto.PositionId && l.MajorCode == 3);
                 if (!checkPositionId)
                 {
                     return BadRequest("Invalid PositionId");
                 }
-                var checkSuperVisedSectionId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SuperVisedSectionId);
+                var checkSuperVisedSectionId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SuperVisedSectionId && l.MajorCode == 1);
                 if (!checkSuperVisedSectionId)
                 {
                     return BadRequest("Invalid SuperVisedSectionId");
                 }
-                var checkSuperVisedGradeId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SuperVisedGradeId);
+                var checkSuperVisedGradeId = _dbcontext.Lookup.Any(l => l.Id == saveDto.SuperVisedGradeId && l.MajorCode == 0);
                 if (!checkSuperVisedGradeId)
                 {
                     return BadRequest("Invalid SuperVisedGradeId");
+                }
+                var checkStatusId = _dbcontext.Lookup.Any(l => l.Id == saveDto.StatusId && l.MajorCode == 2);
+                if (!checkStatusId)
+                {
+                    return BadRequest("Invalid StatusId");
                 }
 
                 _dbcontext.SaveChanges();
